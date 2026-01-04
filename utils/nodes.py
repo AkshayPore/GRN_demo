@@ -1,6 +1,6 @@
 import base64, mimetypes
-from models import model
-from state import letter
+from utils.models import model, structured_model
+from utils.state import letter
 from langchain_core.messages import HumanMessage
 
 def image_url(state : letter):
@@ -19,7 +19,12 @@ def create_prompt(state : letter):
     image_data_url=state["image"]
     message = HumanMessage(
                         content=[
-                            {"type": "text", "text": "What information is in this image? Provide a detailed summary."},
+                            {"type": "text", "text": """Extract all the information from  the below image.Give only invoice number , invoice date, vendor_name & total from the bill.
+                             ###Respond only in structured format-
+                                invoice_number : int
+                                invoice_data : str
+                                vendor_name : str
+                                total_amount : int"""},
                             {"type": "image_url", "image_url": {"url": image_data_url}}
                         ]
                     )
@@ -27,5 +32,23 @@ def create_prompt(state : letter):
 
 def processing(state : letter):
     prompt=state["prompt"]
-    result=model.invoke([prompt])
-    return {'output':result.content}
+    result=structured_model.invoke([prompt])
+    return {'output':result}
+
+def improvement(state : letter):
+    if state["improvement"]=="YES":
+        return "recheck"
+    else:
+        return "proceed"
+    
+
+def query_generator(state : letter):
+    data=state["output"]
+    message = HumanMessage(
+                        content=[
+                            {"type": "text", "text": "You are an expert SQL query writer. Your task is to write an SQL query from the schema/data provoded by user. Do not write any query other than insert query. Do not create delete/drop/truncate/update/alter query. Return only sql query dont return code block. "}, 
+                            {"type": "text", "text": f"Here is schema:{data}"}
+                        ]
+                    )
+    result=model.invoke([message])
+    return {'query':result.content}
