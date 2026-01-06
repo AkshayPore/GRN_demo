@@ -1,5 +1,6 @@
 import base64, mimetypes
 from utils.models import model, structured_model
+from utils.db_connection import get_db_connection
 from utils.state import letter
 from langchain_core.messages import HumanMessage
 
@@ -44,11 +45,30 @@ def improvement(state : letter):
 
 def query_generator(state : letter):
     data=state["output"]
+    schema=""" Table name is bills.
+                columns are :
+                id SERIAL PRIMARY KEY,              -- Auto-incrementing ID for Postgres
+                invoice_number VARCHAR(50),         -- Stores alphanumeric invoice numbers
+                invoice_date DATE,                  -- standard YYYY-MM-DD format
+                vendor_name VARCHAR(100),           -- Name of the shop/vendor
+                total NUMERIC(10, 2)                -- Stores money (e.g., 1250.50)
+);
+                """
     message = HumanMessage(
                         content=[
-                            {"type": "text", "text": "You are an expert SQL query writer. Your task is to write an SQL query from the schema/data provoded by user. Do not write any query other than insert query. Do not create delete/drop/truncate/update/alter query. Return only sql query dont return code block. "}, 
-                            {"type": "text", "text": f"Here is schema:{data}"}
+                            {"type": "text", "text": f"""You are an expert SQL query writer. Your task is to write an SQL query from the schema/data provoded by user. Do not write any query other than insert query. Do not create delete/drop/truncate/update/alter query. Return only sql query dont return code block.
+                                                    My database has four column named as follows: {schema} """}, 
+                            {"type": "text", "text": f"Here is data:{data}"}
                         ]
                     )
     result=model.invoke([message])
     return {'query':result.content}
+
+def db_query(state : letter):
+    query=state["query"]
+    clean_query = query.replace("```sql", "").replace("```", "").strip()
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute(clean_query)
+    cursor.close()
+    conn.commit()
