@@ -1,0 +1,6 @@
+DB_PASSWORD=your database password
+DB_NAME=you database name
+DB_USER="postgres" ( Default user)
+DB_HOST="localhost"
+
+GOOGLE_API_KEY=your API key
