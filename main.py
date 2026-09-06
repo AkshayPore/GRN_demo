@@ -52,8 +52,8 @@ if uploaded_file is not None:
                 st.write("Extracted Fields:")
                 st.markdown(result.get('output', 'No output found.'))
                 
-                st.write("Generated SQL Query:")
-                st.markdown(result.get('query', 'No query found.'))
+                # st.write("Generated SQL Query:")
+                # st.markdown(result.get('query', 'No query found.'))
                 
             except Exception as e:
                 # Print the actual error message to help you debug if it fails
