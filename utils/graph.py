@@ -11,14 +11,14 @@ GRN.add_node("image",image_url)
 GRN.add_node("prompt",create_prompt)
 GRN.add_node("brain",processing)
 GRN.add_node("query",query_generator)
-GRN.add_node("db",db_query)
+# GRN.add_node("db",db_query)
 
 GRN.add_edge(START,"image")
 GRN.add_edge("image","prompt")
 GRN.add_edge("prompt","brain")
 GRN.add_conditional_edges("brain",improvement,{"proceed":"query","recheck":"brain"})
-GRN.add_edge("query","db")
-GRN.add_edge("db",END)
+GRN.add_edge("query",END)
+# GRN.add_edge("db",END)
 
 brain=GRN.compile()
 

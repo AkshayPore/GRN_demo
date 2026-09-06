@@ -20,7 +20,7 @@ def create_prompt(state : letter):
     image_data_url=state["image"]
     message = HumanMessage(
                         content=[
-                            {"type": "text", "text": """Extract all the information from  the below image.Give only invoice number , invoice date, vendor_name & total from the bill.
+                            {"type": "text", "text": """Extract all the information from  the below image.Give only invoice number , invoice date, vendor_name & total from the bill.Extract the exact data from the bill do not round it up.
                              ###Respond only in structured format-
                                 invoice_number : int
                                 invoice_data : str
